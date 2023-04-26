@@ -81,20 +81,24 @@ def transform_profiles(chunk):
 def transform_posts(chunk):
     # Remove rows with null values in profile_id, location_id, numbr_likes, and number_comments
     chunk = chunk.loc[
-        chunk.loc[:, "profile_id"].notna()
+        chunk.loc[:, "sid_profile"].notna()
+        & chunk.loc[:, "profile_id"].notna()
         & chunk.loc[:, "location_id"].notna()
+        & chunk.loc[:, "post_type"].notna()
         & chunk.loc[:, "numbr_likes"].notna()
         & chunk.loc[:, "number_comments"].notna()
     ]
 
+    chunk = chunk.replace({"sid_profile": -1}, np.nan)
+
     # Set chunk dtypes
     chunk = chunk.astype(
         {
-            "sid_profile": "float64",
+            "sid_profile": "Int64",
             "post_id": "object",
             "profile_id": "int64",
             "location_id": "int64",
-            "post_type": "object",
+            "post_type": "int32",
             "description": "object",
             "numbr_likes": "int32",
             "number_comments": "int32",
@@ -173,7 +177,7 @@ print("=========================================================================
 explore_by_chunk(
     "posts",
     dtype={
-        "sid_profile": "int64",
+        "sid_profile": "float64",
         "post_id": "object",
         "profile_id": "float64",
         "location_id": "float64",
@@ -188,11 +192,11 @@ print("=========================================================================
 explore_by_chunk(
     "new_posts",
     dtype={
-        "sid_profile": "float64",
+        "sid_profile": "Int64",
         "post_id": "object",
         "profile_id": "int64",
         "location_id": "int64",
-        "post_type": "object",
+        "post_type": "int32",
         "description": "object",
         "numbr_likes": "int32",
         "number_comments": "int32",
