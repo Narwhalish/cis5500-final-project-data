@@ -6,24 +6,24 @@ USE instagram;
 
 CREATE TABLE IF NOT EXISTS profiles (
     sid BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    profile_id VARCHAR(255),
+    profile_id VARCHAR(255) NOT NULL,
     profile_name VARCHAR(255),
     firstname_lastname VARCHAR(255),
     description VARCHAR(255),
-    following ,
-    followers,
-    n_posts,
-    url,
-    cts ,
+    following INT NOT NULL,
+    followers INT NOT NULL,
+    n_posts INT NOT NULL,
+    url VARCHAR(255),
+    cts TIMESTAMP,
     is_business_account BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS posts (
-    sid INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    post_id VARCHAR(255) NOT NULL,
-    location_id VARCHAR(255) NOT NULL,
-    profile_id VARCHAR(255) NOT NULL,
-    cts VARCHAR(255) NOT NULL,,
+    sid BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    post_id VARCHAR(255),
+    location_id VARCHAR(255),
+    profile_id VARCHAR(255),
+    cts VARCHAR(255),
     post_type INT,
     description VARCHAR(255),
     number_likes INT,
