@@ -6,7 +6,7 @@ USE instagram;
 
 CREATE TABLE IF NOT EXISTS profiles (
     sid BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    profile_id VARCHAR(255) NOT NULL,
+    profile_id BIGINT NOT NULL,
     profile_name VARCHAR(255),
     firstname_lastname VARCHAR(255),
     description VARCHAR(255),
