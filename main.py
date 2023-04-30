@@ -12,19 +12,18 @@ def write_chunk_to_csv(chunk, filename, header):
         quoting=csv.QUOTE_NONNUMERIC,
         header=header,
         mode="a",
-        index=True,
+        index=False,
     )
 
 
-def explore_by_chunk(filename, dtype=None, transform=None):
+def explore_by_chunk(filename, dtype=None, transform=None, timestamp=False):
     with pd.read_csv(
         f"{filename}.csv",
         sep="\t",
         chunksize=100000,
         iterator=True,
-        index_col="sid",
-        parse_dates=["cts"],
-        date_format="%Y-%m-%d %H:%M:%S.%f%z",
+        parse_dates=["cts"] if timestamp else None,
+        date_format="%Y-%m-%d %H:%M:%S.%f%z" if timestamp else None,
         dtype=dtype,
     ) as reader:
         print(f"Table: {filename.upper()}")
@@ -52,7 +51,10 @@ def explore_by_chunk(filename, dtype=None, transform=None):
 
 
 def transform_profiles(chunk):
-    # Remove rows with null values in profile_id, following, followers, and n_posts
+    # Drop sid and cts columns
+    chunk = chunk.drop(labels=["sid", "cts"], axis=1)
+
+    # Remove rows with null values in profile_id, following, followers, and n_posts columns
     chunk = chunk.loc[
         chunk.loc[:, "profile_id"].notna()
         & chunk.loc[:, "following"].notna()
@@ -79,9 +81,12 @@ def transform_profiles(chunk):
 
 
 def transform_posts(chunk):
-    # Remove rows with null values in profile_id, location_id, numbr_likes, and number_comments
+    # Drop sid and sid_profile columns
+    chunk = chunk.drop(labels=["sid", "sid_profile"], axis=1)
+
+    # Remove rows with null values in profile_id, location_id, numbr_likes, and number_comments columns
     chunk = chunk.loc[
-        chunk.loc[:, "sid_profile"].notna()
+        chunk.loc[:, "post_id"].notna()
         & chunk.loc[:, "profile_id"].notna()
         & chunk.loc[:, "location_id"].notna()
         & chunk.loc[:, "post_type"].notna()
@@ -89,12 +94,9 @@ def transform_posts(chunk):
         & chunk.loc[:, "number_comments"].notna()
     ]
 
-    chunk = chunk.replace({"sid_profile": -1}, np.nan)
-
     # Set chunk dtypes
     chunk = chunk.astype(
         {
-            "sid_profile": "Int64",
             "post_id": "object",
             "profile_id": "int64",
             "location_id": "int64",
@@ -109,16 +111,32 @@ def transform_posts(chunk):
 
 
 def transform_locations(chunk):
-    # Remove rows with null values in profile_id, location_id, numbr_likes, and number_comments
-    chunk = chunk.loc[chunk.loc[:, "lat"].notna() & chunk.loc[:, "lng"].notna()]
+    # Rename id column to location_id
+    chunk = chunk.rename(columns={"id": "location_id"})
 
-    # Drop aj_exact_city_match and aj_exact_country_match columns
-    chunk = chunk.drop(labels=["aj_exact_city_match", "aj_exact_country_match"], axis=1)
+    # Drop sid, aj_exact_city_match, aj_exact_country_match, dir_city_id, dir_country_id, and cts columns
+    chunk = chunk.drop(
+        labels=[
+            "sid",
+            "aj_exact_city_match",
+            "aj_exact_country_match",
+            "dir_city_id",
+            "dir_city_name",
+            "dir_country_name",
+            "dir_city_slug",
+            "dir_country_id",
+            "cts",
+        ],
+        axis=1,
+    )
+
+    # Remove rows with null values in lat and lng columns
+    chunk = chunk.loc[chunk.loc[:, "lat"].notna() & chunk.loc[:, "lng"].notna()]
 
     # Set chunk dtypes
     chunk = chunk.astype(
         {
-            "id": "int64",
+            "location_id": "int64",
             "name": "object",
             "street": "object",
             "zip": "object",
@@ -127,11 +145,6 @@ def transform_locations(chunk):
             "cd": "object",
             "phone": "object",
             "blurb": "object",
-            "dir_city_id": "object",
-            "dir_city_name": "object",
-            "dir_city_slug": "object",
-            "dir_country_id": "object",
-            "dir_country_name": "object",
             "lat": "float64",
             "lng": "float64",
             "primary_alias_on_fb": "object",
@@ -143,66 +156,64 @@ def transform_locations(chunk):
     return chunk
 
 
-explore_by_chunk(
-    "profiles",
-    dtype={
-        "profile_id": "float64",
-        "profile_name": "object",
-        "firstname_lastname": "object",
-        "description": "object",
-        "following": "float64",
-        "followers": "float64",
-        "n_posts": "float64",
-        "url": "object",
-        "is_business_account": "object",
-    },
-    transform=transform_profiles,
-)
-print("==========================================================================")
-explore_by_chunk(
-    "new_profiles",
-    dtype={
-        "profile_id": "int64",
-        "profile_name": "object",
-        "firstname_lastname": "object",
-        "description": "object",
-        "following": "int32",
-        "followers": "int32",
-        "n_posts": "int32",
-        "url": "object",
-        "is_business_account": "object",
-    },
-)
-print("==========================================================================")
-explore_by_chunk(
-    "posts",
-    dtype={
-        "sid_profile": "float64",
-        "post_id": "object",
-        "profile_id": "float64",
-        "location_id": "float64",
-        "post_type": "object",
-        "description": "object",
-        "numbr_likes": "float64",
-        "number_comments": "float64",
-    },
-    transform=transform_posts,
-)
-print("==========================================================================")
-explore_by_chunk(
-    "new_posts",
-    dtype={
-        "sid_profile": "Int64",
-        "post_id": "object",
-        "profile_id": "int64",
-        "location_id": "int64",
-        "post_type": "int32",
-        "description": "object",
-        "numbr_likes": "int32",
-        "number_comments": "int32",
-    },
-)
-print("==========================================================================")
+# explore_by_chunk(
+#     "profiles",
+#     dtype={
+#         "profile_id": "float64",
+#         "profile_name": "object",
+#         "firstname_lastname": "object",
+#         "description": "object",
+#         "following": "float64",
+#         "followers": "float64",
+#         "n_posts": "float64",
+#         "url": "object",
+#         "is_business_account": "object",
+#     },
+#     transform=transform_profiles,
+# )
+# print("==========================================================================")
+# explore_by_chunk(
+#     "new_profiles",
+#     dtype={
+#         "profile_id": "int64",
+#         "profile_name": "object",
+#         "firstname_lastname": "object",
+#         "description": "object",
+#         "following": "int32",
+#         "followers": "int32",
+#         "n_posts": "int32",
+#         "url": "object",
+#         "is_business_account": "object",
+#     },
+# )
+# print("==========================================================================")
+# explore_by_chunk(
+#     "posts",
+#     dtype={
+#         "post_id": "object",
+#         "profile_id": "float64",
+#         "location_id": "float64",
+#         "post_type": "object",
+#         "description": "object",
+#         "numbr_likes": "float64",
+#         "number_comments": "float64",
+#     },
+#     transform=transform_posts,
+# )
+# print("==========================================================================")
+# explore_by_chunk(
+#     "new_posts",
+#     dtype={
+#         "post_id": "object",
+#         "profile_id": "int64",
+#         "location_id": "int64",
+#         "post_type": "int32",
+#         "description": "object",
+#         "numbr_likes": "int32",
+#         "number_comments": "int32",
+#     },
+# )
+# print("==========================================================================")
 explore_by_chunk(
     "locations",
     dtype={
@@ -215,11 +226,6 @@ explore_by_chunk(
         "cd": "object",
         "phone": "object",
         "blurb": "object",
-        "dir_city_id": "object",
-        "dir_city_name": "object",
-        "dir_city_slug": "object",
-        "dir_country_id": "object",
-        "dir_country_name": "object",
         "lat": "float64",
         "lng": "float64",
         "primary_alias_on_fb": "object",
@@ -232,7 +238,7 @@ print("=========================================================================
 explore_by_chunk(
     "new_locations",
     dtype={
-        "id": "int64",
+        "location_id": "int64",
         "name": "object",
         "street": "object",
         "zip": "object",
@@ -241,11 +247,6 @@ explore_by_chunk(
         "cd": "object",
         "phone": "object",
         "blurb": "object",
-        "dir_city_id": "object",
-        "dir_city_name": "object",
-        "dir_city_slug": "object",
-        "dir_country_id": "object",
-        "dir_country_name": "object",
         "lat": "float64",
         "lng": "float64",
         "primary_alias_on_fb": "object",
