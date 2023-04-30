@@ -42,8 +42,6 @@ CREATE TABLE IF NOT EXISTS posts (
     number_likes INT NOT NULL,
     number_comments INT NOT NULL,
     PRIMARY KEY (sid)
-#     FOREIGN KEY (profile_id) REFERENCES profiles(profile_id),
-#     FOREIGN KEY (location_id) REFERENCES locations(location_id)
 );
 
 DELETE FROM posts
