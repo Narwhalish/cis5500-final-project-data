@@ -156,64 +156,64 @@ def transform_locations(chunk):
     return chunk
 
 
-# explore_by_chunk(
-#     "profiles",
-#     dtype={
-#         "profile_id": "float64",
-#         "profile_name": "object",
-#         "firstname_lastname": "object",
-#         "description": "object",
-#         "following": "float64",
-#         "followers": "float64",
-#         "n_posts": "float64",
-#         "url": "object",
-#         "is_business_account": "object",
-#     },
-#     transform=transform_profiles,
-# )
-# print("==========================================================================")
-# explore_by_chunk(
-#     "new_profiles",
-#     dtype={
-#         "profile_id": "int64",
-#         "profile_name": "object",
-#         "firstname_lastname": "object",
-#         "description": "object",
-#         "following": "int32",
-#         "followers": "int32",
-#         "n_posts": "int32",
-#         "url": "object",
-#         "is_business_account": "object",
-#     },
-# )
-# print("==========================================================================")
-# explore_by_chunk(
-#     "posts",
-#     dtype={
-#         "post_id": "object",
-#         "profile_id": "float64",
-#         "location_id": "float64",
-#         "post_type": "object",
-#         "description": "object",
-#         "numbr_likes": "float64",
-#         "number_comments": "float64",
-#     },
-#     transform=transform_posts,
-# )
-# print("==========================================================================")
-# explore_by_chunk(
-#     "new_posts",
-#     dtype={
-#         "post_id": "object",
-#         "profile_id": "int64",
-#         "location_id": "int64",
-#         "post_type": "int32",
-#         "description": "object",
-#         "numbr_likes": "int32",
-#         "number_comments": "int32",
-#     },
-# )
-# print("==========================================================================")
+explore_by_chunk(
+    "profiles",
+    dtype={
+        "profile_id": "float64",
+        "profile_name": "object",
+        "firstname_lastname": "object",
+        "description": "object",
+        "following": "float64",
+        "followers": "float64",
+        "n_posts": "float64",
+        "url": "object",
+        "is_business_account": "object",
+    },
+    transform=transform_profiles,
+)
+print("==========================================================================")
+explore_by_chunk(
+    "new_profiles",
+    dtype={
+        "profile_id": "int64",
+        "profile_name": "object",
+        "firstname_lastname": "object",
+        "description": "object",
+        "following": "int32",
+        "followers": "int32",
+        "n_posts": "int32",
+        "url": "object",
+        "is_business_account": "object",
+    },
+)
+print("==========================================================================")
+explore_by_chunk(
+    "posts",
+    dtype={
+        "post_id": "object",
+        "profile_id": "float64",
+        "location_id": "float64",
+        "post_type": "object",
+        "description": "object",
+        "numbr_likes": "float64",
+        "number_comments": "float64",
+    },
+    transform=transform_posts,
+)
+print("==========================================================================")
+explore_by_chunk(
+    "new_posts",
+    dtype={
+        "post_id": "object",
+        "profile_id": "int64",
+        "location_id": "int64",
+        "post_type": "int32",
+        "description": "object",
+        "numbr_likes": "int32",
+        "number_comments": "int32",
+    },
+)
+print("==========================================================================")
 explore_by_chunk(
     "locations",
     dtype={
